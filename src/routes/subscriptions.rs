@@ -1,3 +1,4 @@
+use crate::routes::error_chain_fmt;
 use crate::startup::ApplicationBaseUrl;
 use crate::{
     domain::{NewSubscriber, SubscriberEmail, SubscriberName},
@@ -33,19 +34,6 @@ impl std::fmt::Debug for StoreTokenError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         error_chain_fmt(self, f)
     }
-}
-
-fn error_chain_fmt(
-    e: &impl std::error::Error,
-    f: &mut std::fmt::Formatter<'_>,
-) -> std::fmt::Result {
-    writeln!(f, "{}\n", e)?;
-    let mut current = e.source();
-    while let Some(cause) = current {
-        writeln!(f, "Caused by:\n\t{}", cause)?;
-        current = cause.source();
-    }
-    Ok(())
 }
 
 #[derive(thiserror::Error)]
@@ -185,7 +173,7 @@ pub async fn send_confirmation_email(
         confirmation_link
     );
     email_client
-        .send_email(new_subscriber.email, "Welcome!", &html_body, &plain_body)
+        .send_email(&new_subscriber.email, "Welcome!", &html_body, &plain_body)
         .await
 }
 
