@@ -8,6 +8,8 @@ pub use subscriptions::*;
 pub use subscriptions_confirm::*;
 mod home;
 pub use home::*;
+mod login;
+pub use login::*;
 
 fn error_chain_fmt(
     e: &impl std::error::Error,
