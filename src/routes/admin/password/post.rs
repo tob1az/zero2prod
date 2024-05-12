@@ -7,6 +7,8 @@ use actix_web_flash_messages::FlashMessage;
 use secrecy::{ExposeSecret, Secret};
 use sqlx::PgPool;
 
+const MIN_PASSWORD_LENGTH: usize = 13;
+
 #[derive(serde::Deserialize)]
 pub struct FormData {
     current_password: Secret<String>,
@@ -25,6 +27,10 @@ pub async fn change_password(
             "You entered two different new passwords - the field values must match.",
         )
         .send();
+        return Ok(see_other("/admin/password"));
+    }
+    if form.new_password.expose_secret().len() < MIN_PASSWORD_LENGTH {
+        FlashMessage::error("Your password should be longer than 12 characters.").send();
         return Ok(see_other("/admin/password"));
     }
     let username = get_username(*user_id, &pool).await.map_err(e500)?;

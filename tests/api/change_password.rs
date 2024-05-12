@@ -51,7 +51,6 @@ async fn new_password_fields_must_match() {
     assert_is_redirect_to(&response, "/admin/password");
     // Act - Part 3 - Follow the redirect
     let html_page = app.get_change_password_html().await;
-    dbg!(&html_page);
     assert!(html_page
         .contains("You entered two different new passwords - the field values must match."));
 }
@@ -120,4 +119,30 @@ async fn changing_password_works() {
     });
     let response = app.post_login(&login_body).await;
     assert_is_redirect_to(&response, "/admin/dashboard");
+}
+
+#[tokio::test]
+async fn new_password_is_too_short() {
+    // Arrange
+    let app = spawn_app().await;
+    // Password should be longer than 12 bytes
+    let short_password = Uuid::new_v4().to_string().split_at(12).0.to_owned();
+    // Act - Part 1 - Login
+    app.post_login(&serde_json::json!({
+        "username": &app.test_user.username,
+        "password": &app.test_user.password
+    }))
+    .await;
+    // Act - Part 2 - Try to change password
+    let response = app
+        .post_change_password(&serde_json::json!({
+            "current_password": &app.test_user.password,
+            "new_password": &short_password,
+            "new_password_check": &short_password,
+        }))
+        .await;
+    assert_is_redirect_to(&response, "/admin/password");
+    // Act - Part 3 - Follow the redirect
+    let html_page = app.get_change_password_html().await;
+    assert!(html_page.contains("Your password should be longer than 12 characters."));
 }
