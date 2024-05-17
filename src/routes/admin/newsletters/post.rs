@@ -1,5 +1,4 @@
 use crate::authentication::UserId;
-use crate::domain::SubscriberEmail;
 use crate::idempotency::{save_response, try_processing, IdempotencyKey, NextAction};
 use crate::utils::{e400, e500, see_other};
 use actix_web::{web, HttpResponse};
@@ -63,33 +62,6 @@ pub async fn publish_newsletter(
 
 fn success_message() -> FlashMessage {
     FlashMessage::info("The newsletter issue has been accepted - emails will go out shortly.")
-}
-
-struct ConfirmedSubscriber {
-    email: SubscriberEmail,
-}
-
-#[tracing::instrument(name = "Get confirmed subscribers", skip(pool))]
-async fn get_confirmed_subscribers(
-    pool: &PgPool,
-) -> Result<Vec<Result<ConfirmedSubscriber, anyhow::Error>>, anyhow::Error> {
-    let rows = sqlx::query!(
-        r#"
-    SELECT email
-    FROM subscriptions
-    WHERE status = 'confirmed'
-    "#,
-    )
-    .fetch_all(pool)
-    .await?;
-    let confirmed_subscribers = rows
-        .into_iter()
-        .map(|r| match SubscriberEmail::parse(r.email) {
-            Ok(email) => Ok(ConfirmedSubscriber { email }),
-            Err(error) => Err(anyhow::anyhow!(error)),
-        })
-        .collect();
-    Ok(confirmed_subscribers)
 }
 
 #[tracing::instrument(skip_all)]
