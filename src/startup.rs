@@ -6,9 +6,9 @@ use crate::routes::{
     login, login_form, publish_newsletter, publish_newsletter_form, subscribe,
 };
 use actix_session::{storage::RedisSessionStore, SessionMiddleware};
+use actix_web::middleware::from_fn;
 use actix_web::{cookie::Key, dev::Server, web, App, HttpServer};
 use actix_web_flash_messages::{storage::CookieMessageStore, FlashMessagesFramework};
-use actix_web_lab::middleware::from_fn;
 use secrecy::ExposeSecret;
 use secrecy::Secret;
 use sqlx::postgres::PgPoolOptions;
