@@ -5,7 +5,7 @@ use actix_web::dev::{ServiceRequest, ServiceResponse};
 use actix_web::error::InternalError;
 use actix_web::FromRequest;
 use actix_web::HttpMessage;
-use actix_web_lab::middleware::Next;
+use actix_web::middleware::Next;
 use std::ops::Deref;
 use uuid::Uuid;
 
